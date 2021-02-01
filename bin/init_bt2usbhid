@@ -39,7 +39,7 @@ echo "Config 1: Bluetooth Keyboard / Mouse to USB HID Converter" > "${CONFIG_STR
 # setup a keyboard
 mkdir -p "${KEYBOARD_FUNCTION_DIR}" 
 echo 1 > "${KEYBOARD_FUNCTION_DIR}/protocol"      # Keyboard
-echo 0 > "${KEYBOARD_FUNCTION_DIR}/subclass"      # Boot Interface
+echo 1 > "${KEYBOARD_FUNCTION_DIR}/subclass"      # Boot Interface
 echo 8 > "${KEYBOARD_FUNCTION_DIR}/report_length" # 8 bytes
 
 keyboard_report_descriptor=""
