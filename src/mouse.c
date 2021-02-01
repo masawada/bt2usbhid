@@ -20,6 +20,7 @@ typedef struct {
   char wheel;
 } mouse_report;
 
+int _clamp(int v, int min, int max);
 void _send_mouse_report (mouse_report *report);
 void _handle_button_event (input_event *event, mouse_report *report);
 void _handle_relative_axes_event (input_event *event, mouse_report *report);
@@ -44,6 +45,10 @@ void process_mouse_events () {
   }
 
   ioctl(STDIN_FD, EVIOCGRAB, 0);
+}
+
+int _clamp (int v, int min, int max) {
+  return v > max ? max : v < min ? min : v;
 }
 
 void _send_mouse_report (mouse_report *report) {
@@ -74,4 +79,17 @@ void _handle_button_event (input_event *event, mouse_report *report) {
 }
 
 void _handle_relative_axes_event (input_event *event, mouse_report *report) {
+  switch (event->code) {
+    case REL_X:
+      report->x = _clamp(event->value, -127, 127);
+      break;
+    case REL_Y:
+      report->y = _clamp(event->value, -127, 127);
+      break;
+    case REL_WHEEL:
+      report->wheel = _clamp(event->value, -127, 127);
+      break;
+  }
+
+  _send_mouse_report(report);
 }
