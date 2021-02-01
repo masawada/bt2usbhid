@@ -6,6 +6,11 @@
 #define STDIN_FD  0
 #define STDOUT_FD 1
 
+#define LEFT_CODE   1
+#define RIGHT_CODE  2
+#define MIDDLE_CODE 4
+#define SIDE_CODE   8
+
 typedef struct input_event input_event;
 
 typedef struct {
@@ -15,6 +20,7 @@ typedef struct {
   char wheel;
 } mouse_report;
 
+void _send_mouse_report (mouse_report *report);
 void _handle_button_event (input_event *event, mouse_report *report);
 void _handle_relative_axes_event (input_event *event, mouse_report *report);
 
@@ -40,7 +46,31 @@ void process_mouse_events () {
   ioctl(STDIN_FD, EVIOCGRAB, 0);
 }
 
+void _send_mouse_report (mouse_report *report) {
+  write(STDOUT_FD, report, sizeof(*report));
+
+  report->x     = 0;
+  report->y     = 0;
+  report->wheel = 0;
+}
+
 void _handle_button_event (input_event *event, mouse_report *report) {
+  switch (event->code) {
+    case BTN_LEFT:
+      event->value ? (report->buttons |= LEFT_CODE) : (report->buttons &= ~LEFT_CODE);
+      break;
+    case BTN_RIGHT:
+      event->value ? (report->buttons |= RIGHT_CODE) : (report->buttons &= ~RIGHT_CODE);
+      break;
+    case BTN_MIDDLE:
+      event->value ? (report->buttons |= MIDDLE_CODE) : (report->buttons &= ~MIDDLE_CODE);
+      break;
+    case BTN_SIDE:
+      event->value ? (report->buttons |= SIDE_CODE) : (report->buttons &= ~SIDE_CODE);
+      break;
+  }
+
+  _send_mouse_report(report);
 }
 
 void _handle_relative_axes_event (input_event *event, mouse_report *report) {
