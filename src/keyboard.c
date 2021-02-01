@@ -23,6 +23,7 @@ typedef struct {
   unsigned char keys[6];
 } keyboard_report;
 
+void _send_keyboard_report (keyboard_report *report);
 void _handle_modifier_key (input_event *event, keyboard_report *report, int key_code);
 void _handle_key (input_event *event, keyboard_report *report);
 
@@ -55,7 +56,18 @@ void process_keyboard_events () {
   ioctl(STDIN_FD, EVIOCGRAB, 0);
 }
 
+void _send_keyboard_report (keyboard_report *report) {
+  write(STDOUT_FD, report, sizeof(*report));
+}
+
 void _handle_modifier_key (input_event *event, keyboard_report *report, int key_code) {
+  if (event->value) {
+    report->modifiers |= key_code;
+  } else {
+    report->modifiers &= ~key_code;
+  }
+
+  _send_keyboard_report(report);
 }
 
 void _handle_key (input_event *event, keyboard_report *report) {
