@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+set -eux
+
+SERIALNUMBER="F8B94373-7086-4260-9D6C-7F8BB52D5237"
+MANUFACTURER="AndanteSoftware"
+PRODUCT_NAME="Bluetooth to USB HID Converter"
+
+modprobe dwc2
+modprobe libcomposite
+
+# define directories
+GADGET_DIR="/sys/kernel/config/usb_gadget/g1"
+STRINGS_DIR="${GADGET_DIR}/strings/0x409"
+CONFIG_DIR="${GADGET_DIR}/configs/c.1"
+CONFIG_STRINGS_DIR="${CONFIG_DIR}/strings/0x409"
+FUNCTIONS_DIR="${GADGET_DIR}/functions"
+KEYBOARD_FUNCTION_DIR="${FUNCTIONS_DIR}/hid.usb0"
+
+# setup the usb gadget
+
+mkdir -p "${GADGET_DIR}"
+echo 0x1d6b > "${GADGET_DIR}/idVendor"        # Linux Foundation
+echo 0x0104 > "${GADGET_DIR}/idProduct"       # Multifunction Composite Gadget
+echo 0x0010 > "${GADGET_DIR}/bcdDevice"       # v0.1.0
+echo 0x0200 > "${GADGET_DIR}/bcdUSB"          # USB 2
+echo 0x40   > "${GADGET_DIR}/bMaxPacketSize0" # 64
+
+mkdir -p "${STRINGS_DIR}"
+echo "${SERIALNUMBER}" > "${STRINGS_DIR}/serialnumber"
+echo "${MANUFACTURER}" > "${STRINGS_DIR}/manufacturer"
+echo "${PRODUCT_NAME}" > "${STRINGS_DIR}/product"
+
+mkdir -p "${CONFIG_DIR}"
+mkdir -p "${CONFIG_STRINGS_DIR}"
+echo "Config 1: Bluetooth Keyboard / Mouse to USB HID Converter" > "${CONFIG_STRINGS_DIR}/configuration"
+
+# setup a keyboard
+mkdir -p "${KEYBOARD_FUNCTION_DIR}" 
+echo 1 > /sys/kernel/config/usb_gadget/g1/functions/hid.usb0/protocol      # Keyboard
+echo 0 > /sys/kernel/config/usb_gadget/g1/functions/hid.usb0/subclass      # Boot Interface
+echo 8 > /sys/kernel/config/usb_gadget/g1/functions/hid.usb0/report_length # 8 bytes
+
+keyboard_report_descriptor=""
+keyboard_report_descriptor+="\x05""\x01"       # Usage Page        (Generic Desktop)
+keyboard_report_descriptor+="\x09""\x06"       # Usage             (Keyboard)
+keyboard_report_descriptor+="\xA1""\x01"       # Collection        (Application)
+                                               # - Modifier byte ----------------------------
+keyboard_report_descriptor+="\x05""\x07"       #   Usage Page      (Key Codes)
+keyboard_report_descriptor+="\x19""\xE0"       #   Usage Minimum   (224)
+keyboard_report_descriptor+="\x29""\xE7"       #   Usage Maximum   (231)
+keyboard_report_descriptor+="\x15""\x00"       #   Logical Minimum (0)
+keyboard_report_descriptor+="\x25""\x01"       #   Logical Maximum (1)
+keyboard_report_descriptor+="\x75""\x01"       #   Report Size     (1)
+keyboard_report_descriptor+="\x95""\x08"       #   Report Count    (8)
+keyboard_report_descriptor+="\x81""\x02"       #   Input           (Data, Variable, Absolute)
+                                               # - Reserved byte ----------------------------
+keyboard_report_descriptor+="\x75""\x08"       #   Report Size     (8)
+keyboard_report_descriptor+="\x95""\x01"       #   Report Count    (1)
+keyboard_report_descriptor+="\x81""\x01"       #   Input           (Constant)
+                                               # - LED report -------------------------------
+keyboard_report_descriptor+="\x05""\x08"       #   Usage Page      (Page# for LEDs)
+keyboard_report_descriptor+="\x19""\x01"       #   Usage Minimum   (1)
+keyboard_report_descriptor+="\x29""\x05"       #   Usage Maximum   (5)
+keyboard_report_descriptor+="\x75""\x01"       #   Report Size     (1)
+keyboard_report_descriptor+="\x95""\x05"       #   Report Count    (5)
+keyboard_report_descriptor+="\x91""\x02"       #   Output          (Data, Variable, Absolute)
+                                               # - LED report padding -----------------------
+keyboard_report_descriptor+="\x75""\x03"       #   Report Size     (3)
+keyboard_report_descriptor+="\x95""\x01"       #   Report Count    (1)
+keyboard_report_descriptor+="\x91""\x01"       #   Output          (Constant)
+                                               # - Key arrays (6 bytes) ---------------------
+keyboard_report_descriptor+="\x05""\x07"       #   Usage Page      (Key Codes)
+keyboard_report_descriptor+="\x19""\x00"       #   Usage Minimum   (0)
+keyboard_report_descriptor+="\x2A""\xFF""\x00" #   Usage Maximum   (255)
+keyboard_report_descriptor+="\x15""\x00"       #   Logical Minimum (0)
+keyboard_report_descriptor+="\x26""\xFF""\x00" #   Logical Maximum (255)
+keyboard_report_descriptor+="\x75""\x08"       #   Report Size     (8)
+keyboard_report_descriptor+="\x95""\x06"       #   Report Count    (6)
+keyboard_report_descriptor+="\x81""\x00"       #   Input           (Data, Array)
+                                               # --------------------------------------------
+keyboard_report_descriptor+="\xC0"             # End Collection
+
+echo -ne $keyboard_report_descriptor > /sys/kernel/config/usb_gadget/g1/functions/hid.usb0/report_desc
