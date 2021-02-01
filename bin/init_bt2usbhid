@@ -16,6 +16,7 @@ CONFIG_DIR="${GADGET_DIR}/configs/c.1"
 CONFIG_STRINGS_DIR="${CONFIG_DIR}/strings/0x409"
 FUNCTIONS_DIR="${GADGET_DIR}/functions"
 KEYBOARD_FUNCTION_DIR="${FUNCTIONS_DIR}/hid.usb0"
+MOUSE_FUNCTION_DIR="${FUNCTIONS_DIR}/hid.usb1"
 
 # setup the usb gadget
 
@@ -83,6 +84,48 @@ keyboard_report_descriptor+="\xC0"             # End Collection
 
 echo -ne $keyboard_report_descriptor > /sys/kernel/config/usb_gadget/g1/functions/hid.usb0/report_desc
 
+# setup a mouse
+mkdir -p "${MOUSE_FUNCTION_DIR}"
+echo 2 > "${MOUSE_FUNCTION_DIR}/protocol"      # Mouse
+echo 1 > "${MOUSE_FUNCTION_DIR}/subclass"      # Boot Interface
+echo 4 > "${MOUSE_FUNCTION_DIR}/report_length" # 4 bytes
+
+mouse_report_descriptor=""
+mouse_report_descriptor+="\x05""\x01" # Usage Page          (Generic Desktop)
+mouse_report_descriptor+="\x09""\x02" # Usage               (Mouse)
+mouse_report_descriptor+="\xA1""\x01" # Collection          (Application)
+mouse_report_descriptor+="\x09""\x01" #   Usage             (Pointer)
+mouse_report_descriptor+="\xA1""\x00" #   Collection        (Physical)
+                                      # - Buttons ------------------------------------
+mouse_report_descriptor+="\x05""\x09" #     Usage Page      (Buttons)
+mouse_report_descriptor+="\x19""\x01" #     Usage Minimum   (Button 1)
+mouse_report_descriptor+="\x29""\x04" #     Usage Maximum   (Button 4)
+mouse_report_descriptor+="\x15""\x00" #     Logical Minimum (0)
+mouse_report_descriptor+="\x25""\x01" #     Logical Maximum (1)
+mouse_report_descriptor+="\x75""\x01" #     Report Size     (1)
+mouse_report_descriptor+="\x95""\x04" #     Report Count    (4)
+mouse_report_descriptor+="\x81""\x02" #     Input           (Data, Variable, Absolute)
+                                      # - Padding ------------------------------------
+mouse_report_descriptor+="\x75""\x04" #     Report Size     (4)
+mouse_report_descriptor+="\x95""\x01" #     Report Count    (1)
+mouse_report_descriptor+="\x81""\x01" #     Input           (Constant)
+                                      # - Pointer and Wheel --------------------------
+mouse_report_descriptor+="\x05""\x01" #     Usage Page      (Generic Desktop)
+mouse_report_descriptor+="\x09""\x30" #     Usage           (X)
+mouse_report_descriptor+="\x09""\x31" #     Usage           (Y)
+mouse_report_descriptor+="\x09""\x38" #     Usage           (Wheel)
+mouse_report_descriptor+="\x15""\x81" #     Logical Minimum (-127)
+mouse_report_descriptor+="\x25""\x7F" #     Logical Maximum (127)
+mouse_report_descriptor+="\x75""\x08" #     Report Size     (8)
+mouse_report_descriptor+="\x95""\x03" #     Report Count    (3)
+mouse_report_descriptor+="\x81""\x06" #     Input           (Data, Variable, Relative)
+                                      # ----------------------------------------------
+mouse_report_descriptor+="\xC0"       #   End Collection    (Physical)
+mouse_report_descriptor+="\xC0"       # End Collection      (Application)
+
+echo -ne $mouse_report_descriptor > /sys/kernel/config/usb_gadget/g1/functions/hid.usb1/report_desc
+
 ln -s /sys/kernel/config/usb_gadget/g1/functions/hid.usb0 /sys/kernel/config/usb_gadget/g1/configs/c.1/
+ln -s /sys/kernel/config/usb_gadget/g1/functions/hid.usb1 /sys/kernel/config/usb_gadget/g1/configs/c.1/
 
 ls /sys/class/udc > /sys/kernel/config/usb_gadget/g1/UDC
