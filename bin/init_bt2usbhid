@@ -37,9 +37,9 @@ echo "Config 1: Bluetooth Keyboard / Mouse to USB HID Converter" > "${CONFIG_STR
 
 # setup a keyboard
 mkdir -p "${KEYBOARD_FUNCTION_DIR}" 
-echo 1 > /sys/kernel/config/usb_gadget/g1/functions/hid.usb0/protocol      # Keyboard
-echo 0 > /sys/kernel/config/usb_gadget/g1/functions/hid.usb0/subclass      # Boot Interface
-echo 8 > /sys/kernel/config/usb_gadget/g1/functions/hid.usb0/report_length # 8 bytes
+echo 1 > "${KEYBOARD_FUNCTION_DIR}/protocol"      # Keyboard
+echo 0 > "${KEYBOARD_FUNCTION_DIR}/subclass"      # Boot Interface
+echo 8 > "${KEYBOARD_FUNCTION_DIR}/report_length" # 8 bytes
 
 keyboard_report_descriptor=""
 keyboard_report_descriptor+="\x05""\x01"       # Usage Page        (Generic Desktop)
