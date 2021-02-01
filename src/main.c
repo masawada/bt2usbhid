@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "./keyboard.h"
+#include "./mouse.h"
 
 #define NO_MODE 0
 #define KEYBOARD_MODE 1
@@ -19,7 +20,7 @@ int main (int argc, char *argv[]) {
       process_keyboard_events();
       break;
     case MOUSE_MODE:
-      printf("Mouse Mode\n");
+      process_mouse_events();
       break;
     default:
       show_help(program_name);
