@@ -2,6 +2,8 @@
 #include <getopt.h>
 #include <stdlib.h>
 
+#include "./keyboard.h"
+
 #define NO_MODE 0
 #define KEYBOARD_MODE 1
 #define MOUSE_MODE 2
@@ -14,7 +16,7 @@ int main (int argc, char *argv[]) {
 
   switch (parse_options(argc, argv)) {
     case KEYBOARD_MODE:
-      printf("Keyboard Mode\n");
+      process_keyboard_events();
       break;
     case MOUSE_MODE:
       printf("Mouse Mode\n");
