@@ -1,0 +1,3 @@
+KERNEL=="event*", ATTRS{name}=="KEYBOARD_NAME", TAG+="systemd", SYMLINK+="input/keyboard", ENV{SYSTEMD_ALIAS}="/sys/class/input/keyboard"
+
+KERNEL=="event*", ATTRS{name}=="MOUSE_NAME", TAG+="systemd", SYMLINK+="input/mouse", ENV{SYSTEMD_ALIAS}="/sys/class/input/mouse"
