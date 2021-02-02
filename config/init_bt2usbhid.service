@@ -1,0 +1,11 @@
+[Unit]
+Description=USB Gadget (Bluetooth Keyboard / Mouse Event to USB HID Converter) Initializer
+After=sys-kernel-config.mount
+Documentation=https://github.com/masawada/bt2usbhid
+
+[Service]
+ExecStart=/usr/local/bin/init_bt2usbhid
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target

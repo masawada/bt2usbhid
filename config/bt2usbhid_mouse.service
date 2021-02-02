@@ -1,0 +1,13 @@
+[Unit]
+Description=Bluetooth Mouse Event to USB HID Report Converter
+After=dev-input-mouse.device
+BindsTo=dev-input-mouse.device
+Requires=init_bt2usbhid.service
+Documentation=https://github.com/masawada/bt2usbhid
+
+[Service]
+ExecStart=/bin/sh -c '/usr/local/bin/bt2usbhid -m < /dev/input/mouse > /dev/hidg1'
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
