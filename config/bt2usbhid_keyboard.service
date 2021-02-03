@@ -1,7 +1,7 @@
 [Unit]
 Description=Bluetooth Keyboard Event to USB HID Report Converter
-After=dev-input-keyboard.device
-BindsTo=dev-input-keyboard.device
+After=sys-class-input-keyboard.device
+BindsTo=sys-class-input-keyboard.device
 Requires=init_bt2usbhid.service
 Documentation=https://github.com/masawada/bt2usbhid
 
@@ -11,3 +11,4 @@ Restart=always
 
 [Install]
 WantedBy=multi-user.target
+WantedBy=sys-class-input-keyboard.device
