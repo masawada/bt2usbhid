@@ -16,7 +16,7 @@ $ sudo bluetoothctl
 ...
 [bluetooth] # pair 00:00:00:00:00:00
 [bluetooth] # connect 00:00:00:00:00:00
-[bluetooth] # truest 00:00:00:00:00:00
+[bluetooth] # trust 00:00:00:00:00:00
 ```
 
 Second, define udev rules.
