@@ -6,7 +6,7 @@ This tool converts Bluetooth keyboard or mouse events to USB HID Reports. It can
 
 ## Installation
 
-First, connect and trust a keyboard and a mouse to your device.
+First, connect a keyboard and a mouse to your device and trust these.
 
 ```
 $ sudo bluetoothctl
